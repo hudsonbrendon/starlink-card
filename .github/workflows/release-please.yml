@@ -13,6 +13,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: googleapis/release-please-action@v4
+        id: release
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      # Build + attach the bundle in the SAME job: a release created by the
+      # default GITHUB_TOKEN does not trigger a separate `release` workflow.
+      - uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.release_created }}
+      - uses: actions/setup-node@v4
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          node-version: 20
+          cache: npm
+      - if: ${{ steps.release.outputs.release_created }}
+        run: npm ci
+      - if: ${{ steps.release.outputs.release_created }}
+        run: npm run build
+      - name: Attach bundle to release
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ steps.release.outputs.tag_name }} starlink-card.js --clobber
