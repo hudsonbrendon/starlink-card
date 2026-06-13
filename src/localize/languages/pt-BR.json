@@ -1,0 +1,23 @@
+{
+  "status": {
+    "online": "Online",
+    "offline": "Offline",
+    "obstructed": "Obstruído",
+    "heating": "Derretendo neve",
+    "thermal": "Superaquecido",
+    "stowed": "Recolhido",
+    "sleeping": "Em repouso",
+    "booting": "Iniciando",
+    "unavailable": "Indisponível"
+  },
+  "stats": {
+    "download": "Download",
+    "upload": "Upload",
+    "ping": "Ping",
+    "obstruction": "Obstrução"
+  },
+  "actions": {
+    "reboot": "Reiniciar",
+    "stow": "Recolher"
+  }
+}

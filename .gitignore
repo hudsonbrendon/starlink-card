@@ -1,0 +1,13 @@
+node_modules/
+*.log
+.DS_Store
+.cache/
+coverage/
+# build output is committed for manual installs / verified by CI, but ignore local rebuild noise
+*.tsbuildinfo
+# local build output — released as a CI-attached asset, not committed
+starlink-card.js
+starlink-card.js.map
+# dev-only harness (depends on the built bundle)
+harness.html
+art/

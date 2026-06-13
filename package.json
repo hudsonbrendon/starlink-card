@@ -1,0 +1,45 @@
+{
+  "name": "starlink-card",
+  "version": "0.1.0",
+  "description": "Animated Lovelace card for the native Home Assistant Starlink integration, in the spirit of vacuum-card.",
+  "keywords": [
+    "home-assistant",
+    "lovelace",
+    "hacs",
+    "starlink",
+    "custom-card"
+  ],
+  "module": "starlink-card.js",
+  "type": "module",
+  "license": "MIT",
+  "author": "Hudson Brendon <contato.hudsonbrendon@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hudsonbrendon/starlink-card.git"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "start": "rollup -c --watch",
+    "lint": "prettier --check \"src/**/*.{ts,json}\"",
+    "format": "prettier --write \"src/**/*.{ts,json}\"",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "custom-card-helpers": "^1.9.0",
+    "home-assistant-js-websocket": "^9.4.0",
+    "lit": "^3.1.4"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.8",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/plugin-url": "^8.0.2",
+    "prettier": "^3.3.3",
+    "rollup": "^4.21.0",
+    "tslib": "^2.6.3",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}
