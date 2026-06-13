@@ -8,7 +8,8 @@ import {
 } from 'custom-card-helpers';
 
 import type { StarlinkCardConfig, StarlinkStatus } from './types';
-import { CARD_VERSION, DEFAULT_SUFFIX, STATUS_META } from './const';
+import { CARD_VERSION, STATUS_META } from './const';
+import { resolveEntities, type Role } from './resolve';
 import { computeStatus } from './state';
 import { formatSpeed, formatPing, formatPercent } from './format';
 import { localize } from './localize/localize';
@@ -22,20 +23,6 @@ console.info(
   'color:#2f6bff;background:#1a1a2e;border-radius:0 3px 3px 0;padding:2px 4px',
 );
 
-const ROLE_DOMAIN: Record<string, string> = {
-  connected: 'binary_sensor',
-  obstructed: 'binary_sensor',
-  heating: 'binary_sensor',
-  thermal_throttle: 'binary_sensor',
-  sleep: 'binary_sensor',
-  stowed: 'switch',
-  download: 'sensor',
-  upload: 'sensor',
-  ping: 'sensor',
-  ping_drop_rate: 'sensor',
-  restart: 'button',
-};
-
 export class StarlinkCard extends LitElement implements LovelaceCard {
   static styles = styles;
 
@@ -46,14 +33,23 @@ export class StarlinkCard extends LitElement implements LovelaceCard {
 
   public hass!: HomeAssistant;
   private _config!: StarlinkCardConfig;
+  /** role -> entity_id, resolved per render (language-independent). */
+  private _ids: Partial<Record<Role, string>> = {};
 
   static async getConfigElement(): Promise<LovelaceCardEditor> {
     await import('./editor');
     return document.createElement('starlink-card-editor') as LovelaceCardEditor;
   }
 
-  static getStubConfig(): Partial<StarlinkCardConfig> {
-    return { name: 'Starlink', entities: {} };
+  static getStubConfig(hass?: HomeAssistant): Partial<StarlinkCardConfig> {
+    // anchor on any entity from the starlink integration so the card works
+    // out of the box regardless of the HA language.
+    const reg = hass?.entities as Record<string, { platform?: string }> | undefined;
+    let entity: string | undefined;
+    if (reg) {
+      entity = Object.keys(reg).find((id) => reg[id].platform === 'starlink');
+    }
+    return entity ? { name: 'Starlink', entity } : { name: 'Starlink' };
   }
 
   public setConfig(config: StarlinkCardConfig): void {
@@ -65,35 +61,20 @@ export class StarlinkCard extends LitElement implements LovelaceCard {
     return 3;
   }
 
-  /** Base device slug, derived from the primary entity (strip known suffix). */
-  private _base(): string {
-    const obj = this._config.entity?.split('.')[1];
-    if (!obj) return 'starlink';
-    const suffixes = Object.values(DEFAULT_SUFFIX).sort((a, b) => b.length - a.length);
-    for (const s of suffixes) {
-      if (obj.endsWith(`_${s}`)) return obj.slice(0, obj.length - s.length - 1);
-    }
-    return obj;
+  private _entityId(role: Role): string | undefined {
+    return this._ids[role];
   }
 
-  private _entityId(role: keyof typeof ROLE_DOMAIN): string | undefined {
-    const explicit = this._config.entities?.[role as keyof StarlinkCardConfig['entities']];
-    if (explicit) return explicit as string;
-    const suffix = DEFAULT_SUFFIX[role];
-    if (!suffix) return undefined;
-    return `${ROLE_DOMAIN[role]}.${this._base()}_${suffix}`;
-  }
-
-  private _stateObj(role: keyof typeof ROLE_DOMAIN): HassEntity | undefined {
+  private _stateObj(role: Role): HassEntity | undefined {
     const id = this._entityId(role);
     return id ? this.hass?.states[id] : undefined;
   }
 
-  private _stateStr(role: keyof typeof ROLE_DOMAIN): string | undefined {
+  private _stateStr(role: Role): string | undefined {
     return this._stateObj(role)?.state;
   }
 
-  private _num(role: keyof typeof ROLE_DOMAIN): number | null {
+  private _num(role: Role): number | null {
     const v = this._stateObj(role)?.state;
     if (v === undefined || v === 'unavailable' || v === 'unknown') return null;
     const n = Number(v);
@@ -113,6 +94,9 @@ export class StarlinkCard extends LitElement implements LovelaceCard {
 
   protected render(): TemplateResult | typeof nothing {
     if (!this._config || !this.hass) return nothing;
+
+    // resolve entity ids for this render (stable across HA languages)
+    this._ids = resolveEntities(this.hass, this._config);
 
     const status = this._status();
     const meta = STATUS_META[status];

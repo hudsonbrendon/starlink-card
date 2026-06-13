@@ -34,34 +34,44 @@ An animated Lovelace card for Home Assistant's **native [Starlink integration](h
 
 ## Usage
 
-Add the card via the dashboard UI (it appears as **Starlink Card**), or in YAML:
+Add the card via the dashboard UI (it appears as **Starlink Card**). The
+minimal YAML is just:
 
 ```yaml
 type: custom:starlink-card
 name: Starlink
-entity: binary_sensor.starlink_connected
+```
+
+**Works in any Home Assistant language.** The card resolves its entities through
+the entity registry using each entity's stable integration key (`translation_key`
+/ `device_class`) — **not** its display name — so it works the same whether your
+HA is in English, Português, Deutsch, etc. By default it auto-discovers the
+Starlink device. If you have more than one, point it at any one Starlink entity:
+
+```yaml
+type: custom:starlink-card
+name: Starlink
+entity: binary_sensor.starlink_connectivity # any entity of the target device
 show_stats: true
 show_buttons: false
 ```
 
-The card auto-derives the other entities from the device of `entity`. If your
-entity ids differ, set them explicitly:
+You normally **don't** need to list entities. Only override if auto-resolution
+misses something — use _your_ actual entity ids (they are localized, so pick
+them from the entity picker in the GUI editor):
 
 ```yaml
 type: custom:starlink-card
 name: Starlink
 entities:
-  connected: binary_sensor.starlink_connected
-  obstructed: binary_sensor.starlink_obstructed
-  heating: binary_sensor.starlink_heating
-  thermal_throttle: binary_sensor.starlink_thermal_throttle
-  sleep: binary_sensor.starlink_sleep
-  stowed: switch.starlink_stowed
-  download: sensor.starlink_downlink_throughput
-  upload: sensor.starlink_uplink_throughput
+  connected: binary_sensor.starlink_conectividade
+  obstructed: binary_sensor.starlink_obstruido_no_momento
+  download: sensor.starlink_taxa_de_transferencia_de_download
+  upload: sensor.starlink_taxa_de_transferencia_de_upload
   ping: sensor.starlink_ping
-  ping_drop_rate: sensor.starlink_ping_drop_rate
-  restart: button.starlink_restart
+  ping_drop_rate: sensor.starlink_taxa_de_perda_de_ping
+  stowed: switch.starlink_recolhido
+  restart: button.starlink_reiniciar
 ```
 
 ## Options

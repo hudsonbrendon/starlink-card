@@ -1,22 +1,6 @@
 import type { StarlinkStatus } from './types';
 
-export const CARD_VERSION = '0.1.0';
-
-/** Default entity-id suffixes (after the device slug) for the native
- *  Home Assistant `starlink` integration. Used for auto-derivation. */
-export const DEFAULT_SUFFIX: Record<string, string> = {
-  connected: 'connected',
-  obstructed: 'obstructed',
-  heating: 'heating',
-  thermal_throttle: 'thermal_throttle',
-  sleep: 'sleep',
-  stowed: 'stowed',
-  download: 'downlink_throughput',
-  upload: 'uplink_throughput',
-  ping: 'ping',
-  ping_drop_rate: 'ping_drop_rate',
-  restart: 'restart',
-};
+export const CARD_VERSION = '1.0.0';
 
 export interface StatusMeta {
   labelKey: string;
