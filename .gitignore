@@ -5,9 +5,9 @@ node_modules/
 coverage/
 # build output is committed for manual installs / verified by CI, but ignore local rebuild noise
 *.tsbuildinfo
-# local build output — released as a CI-attached asset, not committed
-starlink-card.js
-starlink-card.js.map
 # dev-only harness (depends on the built bundle)
 harness.html
 art/
+# the built bundle (starlink-card.js) IS committed so HACS can validate the
+# branch and manual installs work; release CI rebuilds + attaches it per release.
+
