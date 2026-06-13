@@ -1,6 +1,6 @@
 {
   "name": "starlink-card",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Animated Lovelace card for the native Home Assistant Starlink integration, in the spirit of vacuum-card.",
   "keywords": [
     "home-assistant",
