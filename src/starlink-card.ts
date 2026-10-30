@@ -1,27 +1,28 @@
-import { LitElement, html, svg, nothing, type TemplateResult } from 'lit';
+import { LitElement, html, svg, nothing, type PropertyValues, type TemplateResult } from 'lit';
 import type { HassEntity } from 'home-assistant-js-websocket';
-import {
-  type HomeAssistant,
-  type LovelaceCard,
-  type LovelaceCardEditor,
-  fireEvent,
-} from 'custom-card-helpers';
+import { type HomeAssistant, type LovelaceCard, fireEvent } from 'custom-card-helpers';
 
 import type { StarlinkCardConfig, StarlinkStatus } from './types';
 import { CARD_VERSION, STATUS_META } from './const';
-import { resolveEntities, type Role } from './resolve';
+import { resolveEntities, type ResolveHass, type Role } from './resolve';
 import { computeStatus } from './state';
 import { formatSpeed, formatPing, formatPercent } from './format';
 import { localize } from './localize/localize';
 import { styles } from './styles';
 import dishImg from './images/starlink.png';
 
-/* eslint-disable no-console */
 console.info(
   `%c STARLINK-CARD %c v${CARD_VERSION} `,
   'color:#fff;background:#2f6bff;font-weight:700;border-radius:3px 0 0 3px;padding:2px 4px',
   'color:#2f6bff;background:#1a1a2e;border-radius:0 3px 3px 0;padding:2px 4px',
 );
+
+const EDITOR_LABELS: Record<string, string> = {
+  name: 'Name',
+  entity: 'Primary entity (Starlink device)',
+  show_stats: 'Show throughput stats',
+  show_buttons: 'Show reboot button',
+};
 
 export class StarlinkCard extends LitElement implements LovelaceCard {
   static styles = styles;
@@ -36,15 +37,22 @@ export class StarlinkCard extends LitElement implements LovelaceCard {
   /** role -> entity_id, resolved per render (language-independent). */
   private _ids: Partial<Record<Role, string>> = {};
 
-  static async getConfigElement(): Promise<LovelaceCardEditor> {
-    await import('./editor');
-    return document.createElement('starlink-card-editor') as LovelaceCardEditor;
+  static getConfigForm() {
+    return {
+      schema: [
+        { name: 'name', selector: { text: {} } },
+        { name: 'entity', selector: { entity: { integration: 'starlink' } } },
+        { name: 'show_stats', selector: { boolean: {} } },
+        { name: 'show_buttons', selector: { boolean: {} } },
+      ],
+      computeLabel: (s: { name: string }) => EDITOR_LABELS[s.name] ?? s.name,
+    };
   }
 
   static getStubConfig(hass?: HomeAssistant): Partial<StarlinkCardConfig> {
     // anchor on any entity from the starlink integration so the card works
     // out of the box regardless of the HA language.
-    const reg = hass?.entities as Record<string, { platform?: string }> | undefined;
+    const reg = (hass as ResolveHass | undefined)?.entities;
     let entity: string | undefined;
     if (reg) {
       entity = Object.keys(reg).find((id) => reg[id].platform === 'starlink');
@@ -59,6 +67,18 @@ export class StarlinkCard extends LitElement implements LovelaceCard {
 
   public getCardSize(): number {
     return 3;
+  }
+
+  public getGridOptions() {
+    const rows = 3 + (this._config?.show_stats ? 1 : 0) + (this._config?.show_buttons ? 1 : 0);
+    return { columns: 6, rows, min_columns: 4, min_rows: 3 };
+  }
+
+  protected willUpdate(changed: PropertyValues): void {
+    if (changed.has('hass')) {
+      const themes = this.hass?.themes as { darkMode?: boolean } | undefined;
+      this.toggleAttribute('dark-mode', Boolean(themes?.darkMode));
+    }
   }
 
   private _entityId(role: Role): string | undefined {
@@ -242,4 +262,9 @@ if (!customElements.get('starlink-card')) {
   description: 'Animated card for the native Starlink integration.',
   preview: true,
   documentationURL: 'https://github.com/hudsonbrendon/starlink-card',
+  // Offer this card for any entity of the core starlink integration.
+  getEntitySuggestion: (hass: ResolveHass, entityId: string) =>
+    hass.entities?.[entityId]?.platform === 'starlink'
+      ? { config: { type: 'custom:starlink-card', name: 'Starlink', entity: entityId } }
+      : null,
 });

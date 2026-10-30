@@ -131,6 +131,14 @@ export const styles = css`
     }
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .wave,
+    .snow,
+    .heat {
+      animation: none;
+    }
+  }
+
   .footer {
     display: flex;
     justify-content: space-around;

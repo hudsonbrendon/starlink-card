@@ -20,9 +20,10 @@
   "scripts": {
     "build": "rollup -c",
     "start": "rollup -c --watch",
-    "lint": "prettier --check \"src/**/*.{ts,json}\"",
+    "lint": "eslint \"src/**/*.ts\" && prettier --check \"src/**/*.{ts,json}\"",
     "format": "prettier --write \"src/**/*.{ts,json}\"",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "custom-card-helpers": "^1.9.0",
@@ -30,16 +31,20 @@
     "lit": "^3.1.4"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.8",
+    "@rollup/plugin-commonjs": "^28.0.0",
     "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/plugin-typescript": "^12.1.0",
     "@rollup/plugin-url": "^8.0.2",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "jsdom": "^26.0.0",
     "prettier": "^3.3.3",
-    "rollup": "^4.21.0",
-    "tslib": "^2.6.3",
-    "typescript": "^5.5.4",
-    "vitest": "^2.0.5"
+    "rollup": "^4.30.0",
+    "tslib": "^2.8.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^3.0.0"
   }
 }
